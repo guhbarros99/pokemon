@@ -1,33 +1,16 @@
 import 'package:flutter/material.dart';
-import 'package:pokemon/services/berry_services.dart';
+import 'package:pokemon/services/pokemon_services.dart';
+import 'pokemon_page.dart';
 
-void main() {
-  runApp(const MyApp());
-}
-
-class MyApp extends StatelessWidget {
-  const MyApp({super.key});
-
-  @override
-  Widget build(BuildContext context) {
-    return MaterialApp(
-      title: 'Pokemon',
-      home: const BerryPage(berryId: "1"),
-    );
-  }
-}
-
-class BerryPage extends StatelessWidget {
-  final String berryId;
-
-  const BerryPage({required this.berryId, super.key});
+class PokedexPage extends StatelessWidget {
+  const PokedexPage({super.key});
 
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: AppBar(title: Text("Berry: $berryId")),
+      appBar: AppBar(title: const Text("Pokédex")),
       body: FutureBuilder(
-        future: fetchBerry(berryId),
+        future: fetchPokemonList(),
         builder: (context, snapshot) {
           if (snapshot.connectionState == ConnectionState.waiting) {
             return const Center(child: CircularProgressIndicator());
@@ -37,22 +20,32 @@ class BerryPage extends StatelessWidget {
             return Center(child: Text("Erro: ${snapshot.error}"));
           }
 
-          final berry = snapshot.data!;
-          return Padding(
-            padding: const EdgeInsets.all(16),
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                Text("Nome: ${berry.name}", style: TextStyle(fontSize: 22)),
-                SizedBox(height: 8),
-                Text("ID: ${berry.id}", style: TextStyle(fontSize: 18)),
-                SizedBox(height: 8),
-                Text(
-                  "Tempo de crescimento: ${berry.growthTime}",
-                  style: TextStyle(fontSize: 18),
+          final pokemons = snapshot.data!;
+
+          return ListView.builder(
+            itemCount: pokemons.length,
+            itemBuilder: (context, index) {
+              final pokemon = pokemons[index];
+              final id = pokemon["id"];
+              final name = pokemon["name"];
+
+              return ListTile(
+                leading: Image.network(
+                  "https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/pokemon/$id.png",
+                  width: 50,
                 ),
-              ],
-            ),
+                title: Text(name.toUpperCase()),
+                subtitle: Text("ID: $id"),
+                onTap: () {
+                  Navigator.push(
+                    context,
+                    MaterialPageRoute(
+                      builder: (_) => PokemonPage(id: id),
+                    ),
+                  );
+                },
+              );
+            },
           );
         },
       ),
