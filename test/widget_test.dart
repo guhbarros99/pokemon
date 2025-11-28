@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
 
-import 'package:pokemon/main.dart';
+import 'package:pokemon/pokedexpage.dart';
 
 void main() {
   testWidgets('App renders Pokédex', (WidgetTester tester) async {
