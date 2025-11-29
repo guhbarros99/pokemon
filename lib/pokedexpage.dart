@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:pokemon/favorites_pages.dart';
 import 'package:pokemon/pokedex_local.dart';
 import 'package:pokemon/services/pokemon_services.dart';
 import 'pokemon_page.dart';
@@ -31,10 +32,38 @@ class _PokedexPageState extends State<PokedexPage> {
     setState(() {});
   }
 
+  Future<void> toggleFavorite(int id) async {
+    if (myPokedex.contains(id)) {
+      await PokedexLocal.removePokemon(id);
+    } else {
+      await PokedexLocal.addPokemon(id);
+    }
+
+    await loadMyPokedex(); // atualiza a lista
+  }
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: AppBar(title: const Text("Pokédex")),
+      backgroundColor: Color.fromARGB(255, 150, 3, 3),
+      appBar: AppBar(
+        title: const Text("Pokémon", style: TextStyle(color: Colors.white),  ),
+        actions: [
+          IconButton(
+            icon: const Icon(
+              Icons.favorite,
+              color: Color.fromARGB(255, 255, 0, 0),
+            ),
+            onPressed: () {
+              Navigator.push(
+                context,
+                MaterialPageRoute(builder: (_) => const FavoritesPage()),
+              );
+            },
+          ),
+        ],
+        flexibleSpace: Container(color: Color(0xFF1A1A1A),),
+      ),
       body: FutureBuilder(
         future: fetchPokemonList(),
         builder: (context, snapshot) {
@@ -67,17 +96,9 @@ class _PokedexPageState extends State<PokedexPage> {
                     myPokedex.contains(id)
                         ? Icons.favorite
                         : Icons.favorite_border,
-                    color: Colors.red,
+                    color: Colors.black,
                   ),
-                  onPressed: () async {
-                    if (myPokedex.contains(id)) {
-                      await PokedexLocal.removePokemon(id);
-                    } else {
-                      await PokedexLocal.addPokemon(id);
-                    }
-
-                    await loadMyPokedex(); // atualiza a tela
-                  },
+                  onPressed: () => toggleFavorite(id),
                 ),
                 onTap: () {
                   Navigator.push(

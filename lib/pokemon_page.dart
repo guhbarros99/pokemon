@@ -9,7 +9,8 @@ class PokemonPage extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: AppBar(title: Text("Pokémon #$id")),
+      backgroundColor: Color.fromARGB(255, 150, 3, 3),
+      appBar: AppBar(title: Text("Pokémon #$id", style: TextStyle(color: const Color.fromARGB(255, 255, 255, 255))), flexibleSpace: Container( color: const  Color(0xFFC62828),),),
       body: FutureBuilder(
         future: fetchPokemon(id),
         builder: (context, snapshot) {
@@ -28,11 +29,21 @@ class PokemonPage extends StatelessWidget {
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.center,
               children: [
-                Image.network(
-                  pokemon["sprites"]["front_default"],
-                  width: 150,
+                Container(
+                  height: 300,
+                  width: double.infinity,
+                  alignment: Alignment.center,
+                  decoration: BoxDecoration(
+                    color: const Color.fromARGB(255, 255, 255, 255),
+                    borderRadius: BorderRadius.circular(20),
+                  ),
+                  child: Image.network(
+                    pokemon["sprites"]["front_default"],
+                    height: 200,
+                  ),
                 ),
-                const SizedBox(height: 20),
+
+                const SizedBox(height: 10),
                 Text(
                   pokemon["name"].toUpperCase(),
                   style: const TextStyle(fontSize: 26),
