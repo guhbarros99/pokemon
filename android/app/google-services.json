@@ -1,0 +1,29 @@
+{
+  "project_info": {
+    "project_number": "273643897704",
+    "project_id": "pokemon-cf29f",
+    "storage_bucket": "pokemon-cf29f.firebasestorage.app"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:273643897704:android:13ee6a7c2ba70dcbd00cdd",
+        "android_client_info": {
+          "package_name": "com.example.pokemon"
+        }
+      },
+      "oauth_client": [],
+      "api_key": [
+        {
+          "current_key": "AIzaSyCJ3WRrIEs71oo6hw1U6yzUUgSyLaj5OYE"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": []
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}
