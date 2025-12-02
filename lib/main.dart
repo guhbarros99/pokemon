@@ -1,15 +1,12 @@
 import 'package:flutter/material.dart';
 import 'package:pokemon/login.dart';
-import 'package:pokemon/pokedexpage.dart';
-import 'package:flutter/material.dart';
 import 'package:firebase_core/firebase_core.dart';
+import 'package:flutter/material.dart';
+import 'package:pokemon/services/notifications_services.dart';
 
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
-
-  // Inicializa Firebase SEM opções extras
-  await Firebase.initializeApp();
-
+  await NotificationService.init();
   runApp(const MyApp());
 }
 
@@ -19,7 +16,6 @@ class MyApp extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return MaterialApp(
-      
       home: const Login(),
       debugShowCheckedModeBanner: false,
     );

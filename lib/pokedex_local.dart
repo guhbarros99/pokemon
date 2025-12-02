@@ -1,4 +1,5 @@
 import 'dart:convert';
+import 'package:pokemon/services/notifications_services.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
 class PokedexLocal {
@@ -20,9 +21,14 @@ class PokedexLocal {
     if (!list.contains(id)) {
       list.add(id);
       await prefs.setString(key, jsonEncode(list));
+      // 🚨 Enviar notificação local aqui!
+      NotificationService.showNotification(
+        id: id,
+        title: "Pokémon adicionado!",
+        body: "O Pokémon #$id foi adicionado à sua Pokédex.",
+      );
     }
   }
-
   // Remover Pokémon
   static Future<void> removePokemon(int id) async {
     final prefs = await SharedPreferences.getInstance();
