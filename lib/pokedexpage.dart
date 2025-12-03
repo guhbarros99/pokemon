@@ -1,4 +1,6 @@
+import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
+import 'package:pokemon/ProfilePage.dart';
 import 'package:pokemon/favorites_pages.dart';
 import 'package:pokemon/pokedex_local.dart';
 import 'package:pokemon/services/pokemon_services.dart';
@@ -32,11 +34,11 @@ class _PokedexPageState extends State<PokedexPage> {
     setState(() {});
   }
 
-  Future<void> toggleFavorite(int id) async {
+  Future<void> toggleFavorite(int id, String name) async {
     if (myPokedex.contains(id)) {
-      await PokedexLocal.removePokemon(id);
+      await PokedexLocal.removePokemon(id, name);
     } else {
-      await PokedexLocal.addPokemon(id);
+      await PokedexLocal.addPokemon(id, name);
     }
 
     await loadMyPokedex(); // atualiza a lista
@@ -47,8 +49,26 @@ class _PokedexPageState extends State<PokedexPage> {
     return Scaffold(
       backgroundColor: Color.fromARGB(255, 150, 3, 3),
       appBar: AppBar(
-        title: const Text("Pokémon", style: TextStyle(color: Colors.white),  ),
+        title: const Text("Pokémon", style: TextStyle(color: Colors.white)),
+
         actions: [
+          GestureDetector(
+            onTap: () {
+              Navigator.pushNamed(context, '/profile');
+            },
+            child: Padding(
+              padding: const EdgeInsets.only(right: 12),
+              child: CircleAvatar(
+                radius: 18,
+                backgroundImage:
+                    FirebaseAuth.instance.currentUser?.photoURL != null
+                    ? NetworkImage(FirebaseAuth.instance.currentUser!.photoURL!)
+                    : const AssetImage("assets/default_avatar.png")
+                          as ImageProvider,
+              ),
+            ),
+          ),
+
           IconButton(
             icon: const Icon(
               Icons.favorite,
@@ -62,7 +82,7 @@ class _PokedexPageState extends State<PokedexPage> {
             },
           ),
         ],
-        flexibleSpace: Container(color: Color(0xFF1A1A1A),),
+        flexibleSpace: Container(color: Color(0xFF1A1A1A)),
       ),
       body: FutureBuilder(
         future: fetchPokemonList(),
@@ -98,7 +118,7 @@ class _PokedexPageState extends State<PokedexPage> {
                         : Icons.favorite_border,
                     color: Colors.black,
                   ),
-                  onPressed: () => toggleFavorite(id),
+                  onPressed: () => toggleFavorite(id, name),
                 ),
                 onTap: () {
                   Navigator.push(

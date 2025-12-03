@@ -14,7 +14,7 @@ class PokedexLocal {
   }
 
   // Adicionar Pokémon
-  static Future<void> addPokemon(int id) async {
+  static Future<void> addPokemon(int id, String name) async {
     final prefs = await SharedPreferences.getInstance();
     final list = await getMyPokedex();
     
@@ -25,16 +25,21 @@ class PokedexLocal {
       NotificationService.showNotification(
         id: id,
         title: "Pokémon adicionado!",
-        body: "O Pokémon #$id foi adicionado à sua Pokédex.",
+        body: "O Pokémon $name foi adicionado à sua Pokédex.",
       );
     }
   }
   // Remover Pokémon
-  static Future<void> removePokemon(int id) async {
+  static Future<void> removePokemon(int id, String name) async {
     final prefs = await SharedPreferences.getInstance();
     final list = await getMyPokedex();
     
     list.remove(id);
     await prefs.setString(key, jsonEncode(list));
+          NotificationService.showNotification(
+        id: id,
+        title: "Pokémon Removido!",
+        body: "O Pokémon $name foi removido da sua Pokédex.",
+      );
   }
 }

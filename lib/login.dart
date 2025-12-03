@@ -11,12 +11,12 @@ class Login extends StatefulWidget {
 
 class _LoginState extends State<Login> {
   bool _isPasswordVisible = false;
+  bool _isLogin = true; // alterna entre login e cadastro
 
-  // Controllers para pegar email e senha
   final TextEditingController _emailController = TextEditingController();
   final TextEditingController _senhaController = TextEditingController();
 
-  // Função de login/cadastro no Firebase
+  // LOGIN
   Future<void> _loginFirebase() async {
     try {
       await FirebaseAuth.instance.signInWithEmailAndPassword(
@@ -24,30 +24,51 @@ class _LoginState extends State<Login> {
         password: _senhaController.text.trim(),
       );
 
-      // LOGIN OK → vai para Pokedex
       Navigator.pushReplacement(
         context,
         MaterialPageRoute(builder: (_) => const PokedexPage()),
       );
     } on FirebaseAuthException catch (e) {
-      if (e.code == 'user-not-found') {
-        // Se o usuário não existe → criar
-        await FirebaseAuth.instance.createUserWithEmailAndPassword(
-          email: _emailController.text.trim(),
-          password: _senhaController.text.trim(),
-        );
-
-        Navigator.pushReplacement(
-          context,
-          MaterialPageRoute(builder: (_) => const PokedexPage()),
-        );
-      } else {
-        // Erros gerais
-        ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(content: Text('Erro: ${e.message}')),
-        );
-      }
+      _showMessage(e.message ?? "Erro no login");
     }
+  }
+
+  // CADASTRO
+  Future<void> _cadastroFirebase() async {
+    try {
+      await FirebaseAuth.instance.createUserWithEmailAndPassword(
+        email: _emailController.text.trim(),
+        password: _senhaController.text.trim(),
+      );
+
+      _showMessage("Conta criada com sucesso! Faça login.");
+      setState(() => _isLogin = true); // volta para login
+    } on FirebaseAuthException catch (e) {
+      _showMessage(e.message ?? "Erro ao cadastrar");
+    }
+  }
+
+  // ESQUECI A SENHA
+  Future<void> _resetSenha() async {
+    if (_emailController.text.isEmpty) {
+      _showMessage("Digite seu email para recuperar a senha.");
+      return;
+    }
+
+    try {
+      await FirebaseAuth.instance
+          .sendPasswordResetEmail(email: _emailController.text.trim());
+
+      _showMessage("Email de recuperação enviado!");
+    } on FirebaseAuthException catch (e) {
+      _showMessage(e.message ?? "Erro ao enviar recuperação");
+    }
+  }
+
+  void _showMessage(String msg) {
+    ScaffoldMessenger.of(context).showSnackBar(
+      SnackBar(content: Text(msg)),
+    );
   }
 
   @override
@@ -56,13 +77,14 @@ class _LoginState extends State<Login> {
       backgroundColor: Colors.white,
       body: SafeArea(
         child: SingleChildScrollView(
-          padding: const EdgeInsets.symmetric(horizontal: 24.0, vertical: 100),
+          padding: const EdgeInsets.symmetric(horizontal: 24.0, vertical: 80),
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.stretch,
             children: [
-              Icon(Icons.catching_pokemon, size: 300, color: Colors.redAccent),
-              const SizedBox(height: 100),
-              
+              Icon(Icons.catching_pokemon, size: 180, color: Colors.redAccent),
+              const SizedBox(height: 50),
+
+              // EMAIL
               TextField(
                 controller: _emailController,
                 keyboardType: TextInputType.emailAddress,
@@ -73,9 +95,10 @@ class _LoginState extends State<Login> {
                   ),
                 ),
               ),
-              
-              const SizedBox(height: 10),
 
+              const SizedBox(height: 12),
+
+              // SENHA
               TextField(
                 controller: _senhaController,
                 obscureText: !_isPasswordVisible,
@@ -85,9 +108,8 @@ class _LoginState extends State<Login> {
                     icon: Icon(
                       _isPasswordVisible ? Icons.visibility : Icons.visibility_off,
                     ),
-                    onPressed: () {
-                      setState(() => _isPasswordVisible = !_isPasswordVisible);
-                    },
+                    onPressed: () =>
+                        setState(() => _isPasswordVisible = !_isPasswordVisible),
                   ),
                   border: OutlineInputBorder(
                     borderRadius: BorderRadius.circular(12),
@@ -97,14 +119,38 @@ class _LoginState extends State<Login> {
 
               const SizedBox(height: 12),
 
+              // BOTÃO PRINCIPAL
               ElevatedButton(
-                style: ElevatedButton.styleFrom(backgroundColor: Colors.red[900]),
-                onPressed: _loginFirebase,
-                child: const Text(
-                  "ENTRAR",
-                  style: TextStyle(fontSize: 18, color: Colors.white),
+                style: ElevatedButton.styleFrom(
+                    backgroundColor: Colors.red[900]),
+                onPressed: _isLogin ? _loginFirebase : _cadastroFirebase,
+                child: Text(
+                  _isLogin ? "ENTRAR" : "CADASTRAR",
+                  style: const TextStyle(fontSize: 18, color: Colors.white),
                 ),
-              )
+              ),
+
+              const SizedBox(height: 12),
+
+              // ESQUECI A SENHA
+              TextButton(
+                onPressed: _resetSenha,
+                child: const Text("Esqueci a senha"),
+              ),
+
+              const SizedBox(height: 8),
+
+              // ALTERNAR LOGIN / CADASTRO
+              TextButton(
+                onPressed: () {
+                  setState(() => _isLogin = !_isLogin);
+                },
+                child: Text(
+                  _isLogin
+                      ? "Não tem conta? Cadastre-se"
+                      : "Já tem conta? Entre",
+                ),
+              ),
             ],
           ),
         ),
