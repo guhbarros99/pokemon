@@ -47,7 +47,7 @@ class _PokedexPageState extends State<PokedexPage> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      backgroundColor: Color.fromARGB(255, 150, 3, 3),
+      backgroundColor: Colors.white,
       appBar: AppBar(
         title: const Text("Pokémon", style: TextStyle(color: Colors.white)),
 

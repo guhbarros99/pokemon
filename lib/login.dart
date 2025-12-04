@@ -35,6 +35,11 @@ class _LoginState extends State<Login> {
 
   // CADASTRO
   Future<void> _cadastroFirebase() async {
+    if (_senhaController.text.length < 6) {
+      _showMessage("A senha precisa ter no mínimo 6 caracteres.");
+      return;
+    }
+
     try {
       await FirebaseAuth.instance.createUserWithEmailAndPassword(
         email: _emailController.text.trim(),
@@ -42,7 +47,12 @@ class _LoginState extends State<Login> {
       );
 
       _showMessage("Conta criada com sucesso! Faça login.");
-      setState(() => _isLogin = true); // volta para login
+
+      setState(() {
+        _isLogin = true;
+        _senhaController.clear();
+      });
+
     } on FirebaseAuthException catch (e) {
       _showMessage(e.message ?? "Erro ao cadastrar");
     }
@@ -61,7 +71,7 @@ class _LoginState extends State<Login> {
 
       _showMessage("Email de recuperação enviado!");
     } on FirebaseAuthException catch (e) {
-      _showMessage(e.message ?? "Erro ao enviar recuperação");
+      _showMessage(e.message ?? "Erro ao enviar email");
     }
   }
 
@@ -106,7 +116,9 @@ class _LoginState extends State<Login> {
                   labelText: 'Senha',
                   suffixIcon: IconButton(
                     icon: Icon(
-                      _isPasswordVisible ? Icons.visibility : Icons.visibility_off,
+                      _isPasswordVisible
+                          ? Icons.visibility
+                          : Icons.visibility_off,
                     ),
                     onPressed: () =>
                         setState(() => _isPasswordVisible = !_isPasswordVisible),
@@ -119,10 +131,11 @@ class _LoginState extends State<Login> {
 
               const SizedBox(height: 12),
 
-              // BOTÃO PRINCIPAL
+              // BOTÃO PRINCIPAL (Login ou Cadastro)
               ElevatedButton(
                 style: ElevatedButton.styleFrom(
-                    backgroundColor: Colors.red[900]),
+                  backgroundColor: Colors.red[900],
+                ),
                 onPressed: _isLogin ? _loginFirebase : _cadastroFirebase,
                 child: Text(
                   _isLogin ? "ENTRAR" : "CADASTRAR",
@@ -132,18 +145,22 @@ class _LoginState extends State<Login> {
 
               const SizedBox(height: 12),
 
-              // ESQUECI A SENHA
-              TextButton(
-                onPressed: _resetSenha,
-                child: const Text("Esqueci a senha"),
-              ),
+              // ESQUECI A SENHA (aparece só no modo Login)
+              if (_isLogin)
+                TextButton(
+                  onPressed: _resetSenha,
+                  child: const Text("Esqueci a senha"),
+                ),
 
               const SizedBox(height: 8),
 
-              // ALTERNAR LOGIN / CADASTRO
+              // ALTERNAR LOGIN/CADASTRO
               TextButton(
                 onPressed: () {
-                  setState(() => _isLogin = !_isLogin);
+                  setState(() {
+                    _isLogin = !_isLogin;
+                    _senhaController.clear(); // limpa senha ao trocar
+                  });
                 },
                 child: Text(
                   _isLogin

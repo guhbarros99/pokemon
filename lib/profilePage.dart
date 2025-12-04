@@ -12,38 +12,37 @@ class ProfilePage extends StatefulWidget {
 }
 
 class _ProfilePageState extends State<ProfilePage> {
-  User? user = FirebaseAuth.instance.currentUser;
+  User? user;
   bool isLoading = false;
 
+  @override
+  void initState() {
+    super.initState();
+    user = FirebaseAuth.instance.currentUser; // carrega o usuário corretamente
+  }
+
   Future<void> _pickImage() async {
-    try {
-      final ImagePicker picker = ImagePicker();
-      final XFile? file = await picker.pickImage(source: ImageSource.gallery);
+    final picker = ImagePicker();
+    final XFile? file = await picker.pickImage(source: ImageSource.gallery);
 
-      if (file == null) return;
+    if (file == null) return;
 
-      setState(() => isLoading = true);
+    setState(() => isLoading = true);
 
-      final ref = FirebaseStorage.instance.ref().child(
-        "profile_pictures/${user!.uid}.jpg",
-      );
+    final ref = FirebaseStorage.instance
+        .ref()
+        .child("profile_pictures/${user!.uid}.jpg");
 
-      // Upload
-      await ref.putFile(File(file.path));
+    await ref.putFile(File(file.path));
+    final url = await ref.getDownloadURL();
 
-      // Pega link
-      final url = await ref.getDownloadURL();
+    await user!.updatePhotoURL(url);
+    await user!.reload();
 
-      // Atualiza o Firebase Auth
-      await user!.updatePhotoURL(url);
-      await user!.reload();
-
+    setState(() {
       user = FirebaseAuth.instance.currentUser;
-
-      setState(() => isLoading = false);
-    } catch (e) {
-      print("ERRO AO TROCAR FOTO: $e");
-    }
+      isLoading = false;
+    });
   }
 
   Future<void> _logout() async {
@@ -54,27 +53,27 @@ class _ProfilePageState extends State<ProfilePage> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
+      backgroundColor: Colors.grey[900],
       appBar: AppBar(
         title: const Text("Meu Perfil", style: TextStyle(color: Colors.white)),
         backgroundColor: Colors.black87,
       ),
-      backgroundColor: Colors.grey[900],
       body: Center(
         child: Column(
           mainAxisAlignment: MainAxisAlignment.center,
           children: [
-            // FOTO DE PERFIL
             CircleAvatar(
               radius: 60,
-              backgroundColor: Colors.white,
-              backgroundImage: user?.photoURL != null
-                  ? NetworkImage(user!.photoURL!)
-                  : const AssetImage("assets/default_avatar.png")
-                        as ImageProvider,
-              child: user?.photoURL == null
-                  ? const Icon(Icons.person, size: 50)
+              backgroundColor: Colors.grey[800],
+              backgroundImage:
+                  (user != null && user!.photoURL != null)
+                      ? NetworkImage(user!.photoURL!)
+                      : null,
+              child: (user == null || user!.photoURL == null)
+                  ? const Icon(Icons.person, size: 60, color: Colors.white)
                   : null,
             ),
+
             const SizedBox(height: 20),
 
             ElevatedButton.icon(
